@@ -47,13 +47,16 @@ def random_courier_data():
 
 # Предварительное создание заказа с последующей отменой после теста
 @pytest.fixture
-def create_and_cancel_order():    
-    payload = OrderMethods.get_order_payload(colors=["BLACK"])
+def create_and_cancel_order(request):    
+    selected_colors = getattr(request, "param", ["BLACK"])
+    
+    payload = OrderMethods.get_order_payload(colors=selected_colors)
     response = OrderMethods.create_order(payload)
-    track_id = response.json().get("track")    
+    track_id = response.json().get("track")
     
-    yield response    
+    yield response
     
+    # Удаление заказа после теста
     if track_id:
         OrderMethods.cancel_order(track_id)
 
